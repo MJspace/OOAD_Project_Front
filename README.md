@@ -1,5 +1,5 @@
 # OOAD_Project
-객체지향 프로그래밍에서 진행된 프로젝트 'PC_Management_System' 입니다.
+객체지향 프로그래밍에서 진행된 프로젝트 'PC_Management_System' 입니다. <br>
 리액트 웹소켓을 이용해 구현되었습니다.
 주요기능
 -로그인
