@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import CashModal from "../components/CashModal";
 
-const CashPage = ({webSocketClient}) => {
+const CashPage = ({webSocketClient, loginName}) => {
   const signupnavigate = useNavigate(); //로그아웃하면 첫 화면인 로그인페이지로 돌아감
   const onClickLogout = () => {
     signupnavigate("/");
@@ -25,6 +25,7 @@ const CashPage = ({webSocketClient}) => {
   return (
     <Container>
       <CashWrapper>
+        {loginName === null ? "로그아웃 상태" : `로그인: ${loginName}`}
         <span style={{ fontWeight: "bold", fontSize: "20px" }}>
           ✔원하는 시간 옵션을 클릭해주세요
         </span>

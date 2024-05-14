@@ -3,11 +3,10 @@ import Input from "../components/Input";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 
-const LoginPage = ({webSocketClient}) => {
-  const signupnavigate = useNavigate();
+const LoginPage = ({webSocketClient, loginName, setLoginName}) => {
+  const navigator = useNavigate();
   const [id, setId] = useState("");
   const [pw, setPw] = useState("");
-  const [loginName, setLoginName] = useState(null);
   const onChangeId = (e) => {
     setId(e.target.value);
   };
@@ -15,7 +14,7 @@ const LoginPage = ({webSocketClient}) => {
     setPw(e.target.value);
   };
   const onClickSignup = () => {
-    signupnavigate("/signup");
+    navigator("/signup");
   };
 
 
@@ -76,6 +75,7 @@ const LoginPage = ({webSocketClient}) => {
             <ButtonWrapper>
               <Button onClick={submitData}>로그인</Button>
               <Button onClick={onClickSignup}>회원가입</Button>
+              <Button onClick={() => navigator("/cash")}>캐시 페이지로 임시 이동</Button>
             </ButtonWrapper>
           </BoxWrapper>
         </Wrapper>

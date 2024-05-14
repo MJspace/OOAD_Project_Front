@@ -3,7 +3,7 @@ import Input from "../components/Input";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
-const LoginPage = ({webSocketClient}) => {
+const LoginPage = ({webSocketClient, loginName}) => {
   const signupnavigate = useNavigate();
   const [id, setId] = useState("");
   const [pw, setPw] = useState("");

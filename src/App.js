@@ -8,6 +8,7 @@ import Cash from "./page/CashPage";
 
 function App() {
   const [webSocketClient, setWebSocketClient] = useState(null);
+  const [loginName, setLoginName] = useState(null);
 
   useEffect(() => {
     const client = new WebSocketClient("ws://localhost");
@@ -43,15 +44,15 @@ function App() {
         <Routes>
           <Route
             path="/"
-            element={<LogIn webSocketClient={webSocketClient} />}
+            element={<LogIn webSocketClient={webSocketClient} loginName={loginName} setLoginName={setLoginName} />}
           />
           <Route
             path="/signup"
-            element={<SignUp webSocketClient={webSocketClient} />}
+            element={<SignUp webSocketClient={webSocketClient} loginName={loginName} />}
           />
           <Route
             path="/cash"
-            element={<Cash webSocketClient={webSocketClient} />}
+            element={<Cash webSocketClient={webSocketClient} loginName={loginName} />}
           />
         </Routes>
       </BrowserRouter>
