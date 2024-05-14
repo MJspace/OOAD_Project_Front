@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import CashModal from "../components/CashModal";
 
-const CashPage = () => {
+const CashPage = ({webSocketClient}) => {
   const signupnavigate = useNavigate(); //로그아웃하면 첫 화면인 로그인페이지로 돌아감
   const onClickLogout = () => {
     signupnavigate("/");

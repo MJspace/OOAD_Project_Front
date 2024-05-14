@@ -1,12 +1,13 @@
 import styled from "styled-components";
 import Input from "../components/Input";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-const LoginPage = () => {
+const LoginPage = ({webSocketClient}) => {
   const signupnavigate = useNavigate();
   const [id, setId] = useState("");
   const [pw, setPw] = useState("");
+  const [loginName, setLoginName] = useState(null);
   const onChangeId = (e) => {
     setId(e.target.value);
   };
@@ -16,10 +17,53 @@ const LoginPage = () => {
   const onClickSignup = () => {
     signupnavigate("/signup");
   };
+
+
+  const submitData = () => {
+    if (id === "") {
+      alert("아이디 비어있음");
+      return;
+    }
+    webSocketClient.send(JSON.stringify(
+      {
+        type: "login",
+        data: {
+          username: id,
+          password: pw
+        }
+      }
+    ));
+  };
+
+
+  const messageEventHandler = (message) => {
+    console.log("서버에서 데이터 받았음");
+
+    const eventData = JSON.parse(message);
+    console.log(eventData);
+
+    if (eventData["type"] === "account") {
+      if (eventData["data"]["loggedIn"] === true) {
+        setLoginName(eventData["data"]["name"]);
+      }
+      else {
+        setLoginName(null);
+      }
+    }
+  };
+
+  useEffect(() => {
+    webSocketClient.addEventListener("message", messageEventHandler);
+  }, []);
+
+
   return (
     <Container>
       <Title>PC Management System</Title>
       <InputBox>
+        <div>
+          {loginName === null ? "로그아웃 상태" : `로그인: ${loginName}`}
+        </div>
         {/* <label for="id">ID</label> */}
         <Wrapper>
           <TextWrapper>
@@ -30,7 +74,7 @@ const LoginPage = () => {
             <Input id="id" value={id} onChange={onChangeId} />
             <Input value={pw} onChange={onChangePw} />
             <ButtonWrapper>
-              <Button>로그인</Button>
+              <Button onClick={submitData}>로그인</Button>
               <Button onClick={onClickSignup}>회원가입</Button>
             </ButtonWrapper>
           </BoxWrapper>

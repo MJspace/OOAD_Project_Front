@@ -1,4 +1,4 @@
-class WebSocketClient {
+export default class WebSocketClient {
   constructor(url) {
     this.url = url;
     this.ws = null;
@@ -36,20 +36,24 @@ class WebSocketClient {
     }
   }
 
-  onMessage(listener) {
-    this.messageListeners.push(listener);
-  }
-
-  onConnected(listener) {
-    this.connectedListeners.push(listener);
-  }
-
-  onDisconnected(listener) {
-    this.disconnectedListeners.push(listener);
-  }
-
-  onError(listener) {
-    this.errorListeners.push(listener);
+  addEventListener(name, callback) {
+    switch (name) {
+      case "message":
+        this.messageListeners.push(callback);
+        break;
+      case "connected":
+        this.connectedListeners.push(callback);
+        break;
+      case "disconnected":
+        this.disconnectedListeners.push(callback);
+        break;
+      case "error":
+        this.errorListeners.push(callback);
+        break;
+      default:
+        console.log(`Unknown event type: ${name}`);
+        break;
+    }
   }
 
   disconnect() {
@@ -58,5 +62,3 @@ class WebSocketClient {
     }
   }
 }
-
-export default WebSocketClient;

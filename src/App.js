@@ -1,5 +1,5 @@
 import "./App.css";
-import WebSocketClient from "./websocketclinet/WebSocket";
+import WebSocketClient from "./WebSocketClient/WebSocketClient.js";
 import { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import LogIn from "./page/LoginPage";
@@ -7,24 +7,24 @@ import SignUp from "./page/SignUp";
 import Cash from "./page/CashPage";
 
 function App() {
-  const [webSocketClinet, setWebSocketClient] = useState(null);
+  const [webSocketClient, setWebSocketClient] = useState(null);
 
   useEffect(() => {
-    const client = new WebSocketClient("ws://your-websocket-server-url");
+    const client = new WebSocketClient("ws://localhost");
 
-    client.onConnected(() => {
+    client.addEventListener("connected", () => {
       console.log("Connected to WebSocket server");
     });
 
-    client.onDisconnected(() => {
+    client.addEventListener("disconnected", () => {
       console.log("Disconnected from WebSocket server");
     });
 
-    client.onMessage((message) => {
+    client.addEventListener("message", (message) => {
       console.log("Received message:", message);
     });
 
-    client.onError((error) => {
+    client.addEventListener("error", (error) => {
       console.error("WebSocket error:", error);
     });
 
@@ -35,21 +35,23 @@ function App() {
       client.disconnect();
     };
   }, []);
+  if (webSocketClient === null)
+    return;
   return (
     <div className="App">
       <BrowserRouter>
         <Routes>
           <Route
             path="/"
-            element={<LogIn websocketclinet={webSocketClinet} />}
+            element={<LogIn webSocketClient={webSocketClient} />}
           />
           <Route
             path="/signup"
-            element={<SignUp websocketclinet={webSocketClinet} />}
+            element={<SignUp webSocketClient={webSocketClient} />}
           />
           <Route
             path="/cash"
-            element={<Cash websocketclinet={webSocketClinet} />}
+            element={<Cash webSocketClient={webSocketClient} />}
           />
         </Routes>
       </BrowserRouter>
