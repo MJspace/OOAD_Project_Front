@@ -5,7 +5,19 @@ import Main from "../assets/main.svg";
 import ProfileImg from "../assets/profile.svg";
 import CashPage from "./CashPage";
 
-const HomePage = ({ webSocketClient, selectedTime, userName }) => {
+const HomePage = ({
+  webSocketClient,
+  selectedTime,
+  setSelectedTime,
+  userName,
+  additionalTime,
+  setAdditionalTime,
+}) => {
+  const [showCashPage, setShowCashPage] = useState(false);
+  const [remainTime, setRemainTime] = useState(
+    selectedTime > 0 ? selectedTime : additionalTime
+  );
+  //시간 상태 설정 selectedTime 없으면 당연히 additionalTime이겠지
   const signupnavigate = useNavigate(); //로그아웃하면 첫 화면인 로그인페이지로 돌아감
   const [loggingOut, setLoggingOut] = useState(false); // 로그인아웃 중 여부 상태
   const onClickLogout = () => {
@@ -19,6 +31,7 @@ const HomePage = ({ webSocketClient, selectedTime, userName }) => {
     );
     setHelpMessage(""); // 메세지 초기화
   };
+
   const LogoutEventHandler = (message) => {
     console.log("서버에서 데이터 받았음");
 
@@ -34,34 +47,35 @@ const HomePage = ({ webSocketClient, selectedTime, userName }) => {
     }
   };
 
+  //서버에게 남은 시간 업데이트 받음
+  const messageEventHandler = (message) => {
+    const eventData = JSON.parse(message);
+    if (eventData["type"] === "time") {
+      setRemainTime(eventData["data"]["leftTime"]);
+    }
+  };
+
   useEffect(() => {
-    // 이벤트 리스너 등록
     const handleEvent = (event) => {
-      LogoutEventHandler(event.data); // 서버로부터 수신한 메시지 데이터를 처리
+      LogoutEventHandler(event.data);
+      messageEventHandler(event.data);
     };
 
     webSocketClient.addEventListener("message", handleEvent);
-  }, [webSocketClient, LogoutEventHandler]); //로그아웃 버튼 클릭 후 서버가 로그아웃 정보 보내줬을 때 처리
+  }, [webSocketClient]);
 
-  const [remainTime, setRemainTime] = useState(selectedTime); //시간 상태 설정
   useEffect(() => {
-    if (selectedTime > 0) {
+    if (remainTime > 0) {
       const interval = setInterval(() => {
-        setRemainTime((prevTime) => prevTime - 1000); // 1초씩 감소
+        setRemainTime((prevTime) => Math.max(prevTime - 1000, 0));
       }, 1000);
-
       return () => clearInterval(interval);
+    } else {
+      //시간 0이면 시간 구입 페이지로 넘어가게
+      setShowCashPage(true);
     }
-  }, [selectedTime]);
-  const timer = () => {
-    //선택한 시간 받아서 0까지 만든(동적시간) 시간 서버로 보내는 것
-    webSocketClient.send({
-      type: "time",
-      data: {
-        leftTime: remainTime,
-      },
-    });
-  };
+  }, [remainTime]);
+
   //직원 호출하기
   const [helpMessage, setHelpMessage] = useState("");
   const onChangeMessage = (e) => {
@@ -87,25 +101,38 @@ const HomePage = ({ webSocketClient, selectedTime, userName }) => {
     setHelpMessage(""); // 입력창 초기화
   };
 
-  //남은 시간이 0이면 캐시페이지로 넘어가
-  if (remainTime === 0) {
+  //showCashPage == true면 캐시 페이지 보여주기 (추가)
+  if (showCashPage) {
     return (
       <CashPage
         webSocketClient={webSocketClient}
         selectedTime={selectedTime}
+        setSelectedTime={setSelectedTime}
         userName={userName}
       />
     );
   }
+  //remainTime 형식 시:분:초로 변경
+  const formatTime = (timeInMillis) => {
+    const seconds = Math.floor(timeInMillis / 1000); // 밀리초를 초로 변환
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const remainingSeconds = seconds % 60;
+
+    return `${hours}:${minutes < 10 ? "0" : ""}${minutes}:${
+      remainingSeconds < 10 ? "0" : ""
+    }${remainingSeconds}`;
+  };
   return (
     <Container>
+      {selectedTime}
       <BackgroundContainer>
         <BackgroundImage src={Main} />
       </BackgroundContainer>
       <Content>
         <ProfileWrapper>
           <ProfileImage src={ProfileImg} />
-          {userName}님의 남은시간은 {remainTime} 입니다.
+          {userName}님의 남은시간은 {formatTime(remainTime)} 입니다.
         </ProfileWrapper>
         <MessageContainer>
           <MessageBox>

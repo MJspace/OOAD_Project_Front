@@ -3,11 +3,10 @@ import Input from "../components/Input";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 
-const LoginPage = ({webSocketClient}) => {
+const LoginPage = ({ webSocketClient, loginName, setLoginName }) => {
   const signupnavigate = useNavigate();
   const [id, setId] = useState("");
   const [pw, setPw] = useState("");
-  const [loginName, setLoginName] = useState(null);
   const onChangeId = (e) => {
     setId(e.target.value);
   };
@@ -18,23 +17,21 @@ const LoginPage = ({webSocketClient}) => {
     signupnavigate("/signup");
   };
 
-
   const submitData = () => {
     if (id === "") {
       alert("아이디 비어있음");
       return;
     }
-    webSocketClient.send(JSON.stringify(
-      {
+    webSocketClient.send(
+      JSON.stringify({
         type: "login",
         data: {
           username: id,
-          password: pw
-        }
-      }
-    ));
+          password: pw,
+        },
+      })
+    );
   };
-
 
   const messageEventHandler = (message) => {
     console.log("서버에서 데이터 받았음");
@@ -45,8 +42,7 @@ const LoginPage = ({webSocketClient}) => {
     if (eventData["type"] === "account") {
       if (eventData["data"]["loggedIn"] === true) {
         setLoginName(eventData["data"]["name"]);
-      }
-      else {
+      } else {
         setLoginName(null);
       }
     }
@@ -56,7 +52,6 @@ const LoginPage = ({webSocketClient}) => {
     webSocketClient.addEventListener("message", messageEventHandler);
   }, []);
 
-
   return (
     <Container>
       <Title>PC Management System</Title>
@@ -64,7 +59,6 @@ const LoginPage = ({webSocketClient}) => {
         <div>
           {loginName === null ? "로그아웃 상태" : `로그인: ${loginName}`}
         </div>
-        {/* <label for="id">ID</label> */}
         <Wrapper>
           <TextWrapper>
             <Text>ID</Text>

@@ -2,8 +2,12 @@ import styled from "styled-components";
 import { useState, useEffect } from "react";
 import CashModal from "../components/CashModal";
 
-const CashPage = ({ webSocketClient }) => {
-  const [selectedTime, setSelectedTime] = useState(null); // 선택된 시간 상태 추가
+const CashPage = ({
+  webSocketClient,
+  selectedTime,
+  setSelectedTime,
+  setAdditionalTime,
+}) => {
   const [isModalOpen, setIsModalOpen] = useState(false); // 모달창 열림 상태 추가
   const [time, setTime] = useState(0); //시간 상태 설정
 
@@ -45,9 +49,8 @@ const CashPage = ({ webSocketClient }) => {
   // 시간 버튼 클릭 이벤트 핸들러(모달창)
   const handleTimeButtonClick = (hours) => {
     const milliseconds = hours * 60 * 60 * 1000;
-    setSelectedTime(milliseconds);
+    setSelectedTime(milliseconds); //selectedTime 밀리초 단위
     setIsModalOpen(true); // 모달창 열기
-    console.log(setIsModalOpen);
     PurchaseTime(milliseconds); // 선택한 시간을 서버로 보냄
   };
 
@@ -59,7 +62,9 @@ const CashPage = ({ webSocketClient }) => {
         </span>
         {time}
         {/* map으로 더 간결하게 함수 만들어서 숏코딩 가능하긴 함 + 문자열에서 ms 정수로 타입 변형 */}
-        <TimeButton onClick={() => handleTimeButtonClick(1)}>1시간</TimeButton>
+        <TimeButton onClick={() => handleTimeButtonClick(0.005)}>
+          1시간
+        </TimeButton>
         <TimeButton onClick={() => handleTimeButtonClick(2)}>2시간</TimeButton>
         <TimeButton onClick={() => handleTimeButtonClick(3)}>3시간</TimeButton>
         <TimeButton onClick={() => handleTimeButtonClick(4)}>4시간</TimeButton>
