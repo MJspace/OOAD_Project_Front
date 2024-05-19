@@ -1,68 +1,76 @@
 import styled from "styled-components";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import CashModal from "../components/CashModal";
 
-const CashPage = ({webSocketClient}) => {
-  const signupnavigate = useNavigate(); //로그아웃하면 첫 화면인 로그인페이지로 돌아감
-  const onClickLogout = () => {
-    signupnavigate("/");
-  };
-
+const CashPage = ({ webSocketClient }) => {
   const [selectedTime, setSelectedTime] = useState(null); // 선택된 시간 상태 추가
   const [isModalOpen, setIsModalOpen] = useState(false); // 모달창 열림 상태 추가
-  // 시간 버튼 클릭 이벤트 핸들러
-  const handleTimeButtonClick = (time) => {
-    setSelectedTime(time);
-    setIsModalOpen(true); // 모달창 열기
-    console.log(setIsModalOpen);
+  const [time, setTime] = useState(0); //시간 상태 설정
+
+  const PurchaseTime = (time) => {
+    //시간 서버로 보내는 것
+    webSocketClient.send({
+      type: "product",
+      data: {
+        type: time,
+        amount: time,
+      },
+    });
+    //시간 더미 데이터
+    messageEventHandler(
+      JSON.stringify({
+        type: "time",
+        data: {
+          leftTime: 30,
+        },
+      })
+    );
   };
 
-  const [message, setMessage] = useState("");
-  const onChangeMessage = (e) => {
-    setMessage(e.target.value);
+  const messageEventHandler = (message) => {
+    console.log("서버에서 데이터 받았음");
+
+    const eventData = JSON.parse(message);
+    console.log(eventData);
+
+    if (eventData["type"] === "time") {
+      setTime(eventData["data"]["leftTime"]);
+    }
   };
+  //최초 1회 실행 렌더링
+  useEffect(() => {
+    webSocketClient.addEventListener("message", messageEventHandler);
+  }, []);
+
+  // 시간 버튼 클릭 이벤트 핸들러(모달창)
+  const handleTimeButtonClick = (hours) => {
+    const milliseconds = hours * 60 * 60 * 1000;
+    setSelectedTime(milliseconds);
+    setIsModalOpen(true); // 모달창 열기
+    console.log(setIsModalOpen);
+    PurchaseTime(milliseconds); // 선택한 시간을 서버로 보냄
+  };
+
   return (
     <Container>
       <CashWrapper>
         <span style={{ fontWeight: "bold", fontSize: "20px" }}>
           ✔원하는 시간 옵션을 클릭해주세요
         </span>
-        {/* map으로 더 간결하게 함수 만들어서 숏코딩 가능하긴 함 */}
-        <TimeButton onClick={() => handleTimeButtonClick("1시간")}>
-          1시간
-        </TimeButton>
-        <TimeButton onClick={() => handleTimeButtonClick("2시간")}>
-          2시간
-        </TimeButton>
-        <TimeButton onClick={() => handleTimeButtonClick("3시간")}>
-          3시간
-        </TimeButton>
-        <TimeButton onClick={() => handleTimeButtonClick("4시간")}>
-          4시간
-        </TimeButton>
-        <TimeButton onClick={() => handleTimeButtonClick("5시간")}>
-          5시간
-        </TimeButton>
-        <TimeButton onClick={() => handleTimeButtonClick("6시간")}>
-          6시간
-        </TimeButton>
+        {time}
+        {/* map으로 더 간결하게 함수 만들어서 숏코딩 가능하긴 함 + 문자열에서 ms 정수로 타입 변형 */}
+        <TimeButton onClick={() => handleTimeButtonClick(1)}>1시간</TimeButton>
+        <TimeButton onClick={() => handleTimeButtonClick(2)}>2시간</TimeButton>
+        <TimeButton onClick={() => handleTimeButtonClick(3)}>3시간</TimeButton>
+        <TimeButton onClick={() => handleTimeButtonClick(4)}>4시간</TimeButton>
+        <TimeButton onClick={() => handleTimeButtonClick(5)}>5시간</TimeButton>
+        <TimeButton onClick={() => handleTimeButtonClick(6)}>6시간</TimeButton>
       </CashWrapper>
       <CashModal
         isOpen={isModalOpen}
         selectedTime={selectedTime}
         onClose={() => setIsModalOpen(false)}
       />
-      <RightWrapper>
-        <MessageBox>
-          <Message
-            onChange={onChangeMessage}
-            placeholder="메세지를 입력해주세요"
-          />
-          <Button>직원 호출하기</Button>
-        </MessageBox>
-        <LogoutButton onClick={onClickLogout}>로그아웃 하기</LogoutButton>
-      </RightWrapper>
     </Container>
   );
 };
@@ -91,54 +99,6 @@ const TimeButton = styled.div`
   cursor: pointer;
   font-size: 25px;
   font-weight: 500;
-`;
-
-const RightWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-`;
-
-const MessageBox = styled.div`
-  width: 450px;
-  padding: 50px 0px 50px 0px;
-  background-color: #96d5ef;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  border-radius: 10px;
-`;
-
-const Message = styled.textarea`
-  width: 250px;
-  height: 150px;
-  font-size: 15px;
-  padding: 10px;
-`;
-
-const Button = styled.button`
-  cursor: pointer;
-  margin-top: 20px;
-  font-size: 20px;
-  font-weight: 700;
-  padding: 10px;
-  width: 250px;
-  background-color: #fff;
-  border: none;
-`;
-
-const LogoutButton = styled.button`
-  margin-top: 60px;
-  width: 450px;
-  padding: 50px 0px 50px 0px;
-  background-color: #96d5ef;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  border-radius: 10px;
-  font-size: 25px;
-  font-weight: 700;
-  border: none;
-  cursor: pointer;
 `;
 
 export default CashPage;
