@@ -86,7 +86,6 @@ function App() {
                 webSocketClient={webSocketClient}
                 selectedTime={selectedTime}
                 setSelectedTime={setSelectedTime}
-                setAdditionalTime={setAdditionalTime}
               />
             }
           />
@@ -98,8 +97,6 @@ function App() {
                 loginName={loginName}
                 selectedTime={selectedTime}
                 setSelectedTime={setSelectedTime}
-                additionalTime={additionalTime}
-                setAdditionalTime={setAdditionalTime}
               />
             }
           />

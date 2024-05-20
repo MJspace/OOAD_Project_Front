@@ -22,6 +22,7 @@ const CashModal = ({ isOpen, selectedTime, onClose }) => {
     const calculatedAmount = selectedTime / (60 * 60); // 이용 금액 계산
     if (cash == calculatedAmount) {
       alert("선택하신 시간이 입력되었습니다.");
+      console.log(selectedTime);
       navigate("/home");
     } else if (!cash) {
       setError("금액(숫자)을 입력해주세요");

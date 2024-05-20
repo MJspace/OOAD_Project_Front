@@ -76,6 +76,7 @@ const CashPage = ({
         selectedTime={selectedTime}
         onClose={() => setIsModalOpen(false)}
       />
+      {selectedTime}
     </Container>
   );
 };

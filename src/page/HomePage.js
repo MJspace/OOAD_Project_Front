@@ -1,23 +1,17 @@
 import { useState, useEffect } from "react";
-import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
+import styled from "styled-components";
 import Main from "../assets/main.svg";
 import ProfileImg from "../assets/profile.svg";
-import CashPage from "./CashPage";
 
 const HomePage = ({
   webSocketClient,
   selectedTime,
   setSelectedTime,
   userName,
-  additionalTime,
-  setAdditionalTime,
 }) => {
-  const [showCashPage, setShowCashPage] = useState(false);
-  const [remainTime, setRemainTime] = useState(
-    selectedTime > 0 ? selectedTime : additionalTime
-  );
-  //시간 상태 설정 selectedTime 없으면 당연히 additionalTime이겠지
+  const navigate = useNavigate();
+  const [remainTime, setRemainTime] = useState(selectedTime);
   const signupnavigate = useNavigate(); //로그아웃하면 첫 화면인 로그인페이지로 돌아감
   const [loggingOut, setLoggingOut] = useState(false); // 로그인아웃 중 여부 상태
   const onClickLogout = () => {
@@ -63,6 +57,10 @@ const HomePage = ({
 
     webSocketClient.addEventListener("message", handleEvent);
   }, [webSocketClient]);
+  //selectedTime 변경될 때마다 remainTime 갱신
+  useEffect(() => {
+    setRemainTime(selectedTime);
+  }, [selectedTime]);
 
   useEffect(() => {
     if (remainTime > 0) {
@@ -72,7 +70,7 @@ const HomePage = ({
       return () => clearInterval(interval);
     } else {
       //시간 0이면 시간 구입 페이지로 넘어가게
-      setShowCashPage(true);
+      navigate("/cash");
     }
   }, [remainTime]);
 
@@ -100,18 +98,6 @@ const HomePage = ({
     alert("메세지가 성공적으로 전송되었습니다");
     setHelpMessage(""); // 입력창 초기화
   };
-
-  //showCashPage == true면 캐시 페이지 보여주기 (추가)
-  if (showCashPage) {
-    return (
-      <CashPage
-        webSocketClient={webSocketClient}
-        selectedTime={selectedTime}
-        setSelectedTime={setSelectedTime}
-        userName={userName}
-      />
-    );
-  }
   //remainTime 형식 시:분:초로 변경
   const formatTime = (timeInMillis) => {
     const seconds = Math.floor(timeInMillis / 1000); // 밀리초를 초로 변환
@@ -125,7 +111,6 @@ const HomePage = ({
   };
   return (
     <Container>
-      {selectedTime}
       <BackgroundContainer>
         <BackgroundImage src={Main} />
       </BackgroundContainer>
