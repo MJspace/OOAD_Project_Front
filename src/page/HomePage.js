@@ -58,9 +58,9 @@ const HomePage = ({
     webSocketClient.addEventListener("message", handleEvent);
   }, [webSocketClient]);
   //selectedTime 변경될 때마다 remainTime 갱신
-  useEffect(() => {
-    setRemainTime(selectedTime);
-  }, [selectedTime]);
+  // useEffect(() => {
+  //   setRemainTime(selectedTime);
+  // }, [selectedTime]);
 
   useEffect(() => {
     if (remainTime > 0) {
