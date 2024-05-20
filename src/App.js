@@ -48,7 +48,7 @@ function App() {
     if (message.type === "control" && message.data.command === "reboot") {
       // 재부팅 메시지 처리
       alert("관리자에 의해 PC가 원격 재부팅됩니다.");
-      window.location = "/";
+      window.location = `/${window.location.search}`;
     }
     else if (message.type === "notice") {
       // 알림 메시지 처리
