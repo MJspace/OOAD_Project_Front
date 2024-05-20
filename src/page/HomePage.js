@@ -6,13 +6,11 @@ import ProfileImg from "../assets/profile.svg";
 
 const HomePage = ({
   webSocketClient,
-  selectedTime,
-  setSelectedTime,
-  userName,
+  loginName,
+  remainTime,
+  setRemainTime
 }) => {
   const navigate = useNavigate();
-  const [remainTime, setRemainTime] = useState(selectedTime);
-  const signupnavigate = useNavigate(); //로그아웃하면 첫 화면인 로그인페이지로 돌아감
   const [loggingOut, setLoggingOut] = useState(false); // 로그인아웃 중 여부 상태
   const onClickLogout = () => {
     //로그아웃 버튼 온클릭
@@ -26,41 +24,23 @@ const HomePage = ({
     setHelpMessage(""); // 메세지 초기화
   };
 
-  const LogoutEventHandler = (message) => {
-    console.log("서버에서 데이터 받았음");
 
-    const eventData = JSON.parse(message);
-    console.log(eventData);
 
-    if (eventData["type"] === "account") {
-      if (eventData["data"]["loggedIn"] === false) {
-        signupnavigate("/");
-      } else {
-        setLoggingOut(false); // 로그아웃 중 상태 해제
+  const messageEventHandler = (message) => {
+    message = JSON.parse(message);
+    if (message.type === "account") {
+      if (message.data.loggedIn === false) {
+        navigate(`/${window.location.search}`);
       }
     }
   };
 
-  //서버에게 남은 시간 업데이트 받음
-  const messageEventHandler = (message) => {
-    const eventData = JSON.parse(message);
-    if (eventData["type"] === "time") {
-      setRemainTime(eventData["data"]["leftTime"]);
-    }
-  };
-
   useEffect(() => {
-    const handleEvent = (event) => {
-      LogoutEventHandler(event.data);
-      messageEventHandler(event.data);
+    webSocketClient.addEventListener("message", messageEventHandler);
+    return () => {
+      webSocketClient.removeEventListener("message", messageEventHandler);
     };
-
-    webSocketClient.addEventListener("message", handleEvent);
-  }, [webSocketClient]);
-  //selectedTime 변경될 때마다 remainTime 갱신
-  // useEffect(() => {
-  //   setRemainTime(selectedTime);
-  // }, [selectedTime]);
+  }, []);
 
   useEffect(() => {
     if (remainTime > 0) {
@@ -70,7 +50,7 @@ const HomePage = ({
       return () => clearInterval(interval);
     } else {
       //시간 0이면 시간 구입 페이지로 넘어가게
-      navigate("/cash");
+      navigate(`/cash${window.location.search}`);
     }
   }, [remainTime]);
 
@@ -89,7 +69,7 @@ const HomePage = ({
     }
     webSocketClient.send(
       JSON.stringify({
-        type: "call",
+        type: "help",
         data: {
           message: helpMessage,
         },
@@ -117,7 +97,9 @@ const HomePage = ({
       <Content>
         <ProfileWrapper>
           <ProfileImage src={ProfileImg} />
-          {userName}님의 남은시간은 {formatTime(remainTime)} 입니다.
+          {loginName}님의 남은시간은 {formatTime(remainTime)} 입니다.
+          <br/>
+          현재 좌석: {new URLSearchParams(document.location.search).get("id") || 0}번
         </ProfileWrapper>
         <MessageContainer>
           <MessageBox>
@@ -132,6 +114,7 @@ const HomePage = ({
             {loggingOut ? "로그아웃 중..." : "로그아웃 하기"}
           </LogoutButton>
         </MessageContainer>
+        <Button onClick={() => navigate(`/cash${window.location.search}`)}>시간 충전하기</Button>
       </Content>
     </Container>
   );

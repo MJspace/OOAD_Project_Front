@@ -23,7 +23,7 @@ const CashModal = ({ isOpen, selectedTime, onClose }) => {
     if (cash == calculatedAmount) {
       alert("선택하신 시간이 입력되었습니다.");
       console.log(selectedTime);
-      navigate("/home");
+      navigate(`/home${window.location.search}`);
     } else if (!cash) {
       setError("금액(숫자)을 입력해주세요");
       return;

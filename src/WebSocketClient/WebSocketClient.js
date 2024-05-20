@@ -56,6 +56,26 @@ export default class WebSocketClient {
     }
   }
 
+  removeEventListener(name, callback) {
+    switch (name) {
+      case "message":
+        this.messageListeners.pop(callback);
+        break;
+      case "connected":
+        this.connectedListeners.pop(callback);
+        break;
+      case "disconnected":
+        this.disconnectedListeners.pop(callback);
+        break;
+      case "error":
+        this.errorListeners.pop(callback);
+        break;
+      default:
+        console.log(`Unknown event type: ${name}`);
+        break;
+    }
+  }
+
   disconnect() {
     if (this.ws) {
       this.ws.close();

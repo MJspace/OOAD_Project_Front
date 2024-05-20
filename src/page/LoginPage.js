@@ -3,8 +3,8 @@ import Input from "../components/Input";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 
-const LoginPage = ({ webSocketClient, loginName, setLoginName }) => {
-  const signupnavigate = useNavigate();
+const LoginPage = ({ webSocketClient }) => {
+  const navigate = useNavigate();
   const [id, setId] = useState("");
   const [pw, setPw] = useState("");
   const onChangeId = (e) => {
@@ -14,7 +14,7 @@ const LoginPage = ({ webSocketClient, loginName, setLoginName }) => {
     setPw(e.target.value);
   };
   const onClickSignup = () => {
-    signupnavigate("/signup");
+    navigate(`/signup${window.location.search}`);
   };
 
   const submitData = () => {
@@ -34,31 +34,26 @@ const LoginPage = ({ webSocketClient, loginName, setLoginName }) => {
   };
 
   const messageEventHandler = (message) => {
-    console.log("서버에서 데이터 받았음");
-
-    const eventData = JSON.parse(message);
-    console.log(eventData);
-
-    if (eventData["type"] === "account") {
-      if (eventData["data"]["loggedIn"] === true) {
-        setLoginName(eventData["data"]["name"]);
-      } else {
-        setLoginName(null);
+    message = JSON.parse(message);
+    if (message.type === "account") {
+      if (message.data.loggedIn) {
+        navigate(`/home${window.location.search}`);
       }
     }
   };
 
   useEffect(() => {
     webSocketClient.addEventListener("message", messageEventHandler);
+    return () => {
+      webSocketClient.removeEventListener("message", messageEventHandler);
+    };
   }, []);
 
   return (
     <Container>
       <Title>PC Management System</Title>
+      <Text>현재 좌석: {new URLSearchParams(document.location.search).get("id") || 0}번</Text>
       <InputBox>
-        <div>
-          {loginName === null ? "로그아웃 상태" : `로그인: ${loginName}`}
-        </div>
         <Wrapper>
           <TextWrapper>
             <Text>ID</Text>
@@ -66,7 +61,7 @@ const LoginPage = ({ webSocketClient, loginName, setLoginName }) => {
           </TextWrapper>
           <BoxWrapper>
             <Input id="id" value={id} onChange={onChangeId} />
-            <Input value={pw} onChange={onChangePw} />
+            <Input value={pw} onChange={onChangePw} type="password" />
             <ButtonWrapper>
               <Button onClick={submitData}>로그인</Button>
               <Button onClick={onClickSignup}>회원가입</Button>
